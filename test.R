@@ -15,8 +15,8 @@ engine <- worker(user ="./ntusd-full.txt")
 # 將正負情緒詞語讀入
 positive <- unique(read_csv("positive.txt"))
 negative <- unique(read_csv("negative.txt"))
-positive <- data.frame(word = positive, sentiments = 1)
-negative <- data.frame(word = negative, sentiemtns = -1)
+positive <- data.frame(word = positive, sentiments = "positive")
+negative <- data.frame(word = negative, sentiemtns = "negative")
 colnames(negative) = c("word","sentiment")
 colnames(positive) = c("word","sentiment")
 LIWC_ch <- rbind(positive, negative)
@@ -57,13 +57,7 @@ draw <- function(path){
   
   # 根據每首歌排名去分析正負向詞語
   emotion_dict <- tidy_text_format %>%
-    inner_join(LIWC_ch, by = "word") %>%
-    # group_by(rank) %>%
-    summarize(sum = sum(sentiment))
-  
-  # 根據排名去畫圖
-  ggplot(emotion_dict, aes(x = rank, y = sum)) +
-    geom_col()
+    inner_join(LIWC_ch, by = "word")
 
   return(emotion_dict)
 }
@@ -72,7 +66,15 @@ song2021 <- draw("./song1.csv")
 song2020 <- draw("./song2.csv")
 song2019 <- draw("./song3.csv")
 song2018 <- draw("./song4.csv")
+song2021$sentiment[song2021$sentiment == "negative"] <- "ch_negative"
 
-
-
-
+years <- rbind(song2018, song2019, song2020, song2021,
+               song_en2018, song_en2019, song_en2020, song_en2021)
+years %>%
+  group_by(year) %>%
+  ggplot() +
+  geom_bar(aes(x = year, fill = sentiment),
+           position = "dodge") +
+  scale_fill_brewer(palette="YlOrRd")
+  # scale_fill_manual(values = c("ch_positive" = "yellow",
+                               # "ch_negative" = ""))
