@@ -1,0 +1,62 @@
+---
+title: "replace_whitespace"
+author: "ya.c"
+date: "6/6/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(stringr)
+
+# dataframe of artists with dash
+df_artists_dash <- data.frame(matrix(NA, ncol=0, nrow = 100))
+for(i in 1:ncol(df_artists) ){
+    v <- as.vector(unlist(df_artists[ ,i]))
+    test0 <- gsub("[[:punct:]]| |feat.|featuring", "-", v)
+    test1 <- gsub("-+", "-", test0)
+    artist_dash <- gsub("^-|-$", "", test1)
+
+    print(ncol(df_artists_dash))
+    df_artists_dash[ , ncol(df_artists_dash) + 1] <- artist_dash
+    colnames(df_artists_dash)[ncol(df_artists_dash)] <- i+1971
+}
+
+# dataframe of titles with dash
+df_titles_dash <- data.frame(matrix(NA, ncol=0, nrow = 100))
+for(i in 1:ncol(df_titles) ){
+    v <- as.vector(unlist(df_titles[ ,i])) 
+    test0 <- gsub("[[:punct:]]| |feat.", "-", v)
+    test1 <- gsub("-+", "-", test0)
+    title_dash <- gsub("^-|-$", "", test1)
+    
+    print(ncol(df_titles_dash))
+    df_titles_dash[ , ncol(df_titles_dash) + 1] <- title_dash                
+    colnames(df_titles_dash)[ncol(df_titles_dash)] <- i+1971
+}
+
+
+
+
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

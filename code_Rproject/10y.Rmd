@@ -1,0 +1,215 @@
+---
+title: "斷詞、分析"
+author: "ya.c"
+date: "6/7/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(jiebaR)
+library(tidytext)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(wordcloud2)
+library(wordcloud)
+
+# df_10y <-data.frame(matrix(NA, ncol=0, nrow = 10))
+# for(x in 1:5){
+#     year <- 1971 + 10*x
+#     col <- 10*x
+# 
+# 
+#     df_10y[ , ncol(df_10y) + 1] <- df_lyrics[1:10,col]
+#     colnames(df_10y)[ncol(df_10y)] <- year
+# 
+# }
+
+# top_10 <- data.frame(matrix(NA, ncol=5, nrow = 1))
+# for(m in 1:5){
+#     df_10y[,m] -> text
+#     v1 <- as.vector(unlist(text))
+#     top10 <- paste(v1[1],v1[2],v1[3],v1[4],v1[5],v1[6],v1[7],v1[8],v1[9],v1[10])
+#     top_10[1,m] <- top10
+# }
+
+
+
+
+# df_per10y <- tibble::tibble(
+#     year = c(1981, 1991, 2001, 2011, 2021),
+#     lyrics = as.vector(unlist(top_10[1,]))
+# 
+# )
+
+
+
+seg <- worker()
+
+# for(k in 1:ncol(df_10y) ){
+#     for(l in 1:nrow(df_10y) ){
+#         doc <- segment(df_10y[l, k], seg)
+#         doc <- paste(doc, collapse = "\u3000")
+#     }
+# }
+
+
+
+
+#cleaning
+# df_cleaned <- df_per10y
+clean = function(x){
+  x = gsub("won't", "will not", x)
+  x = gsub("can't", "can not", x)
+  x = gsub("n't", " not", x)
+  x = gsub("'ll", " will", x)
+  x = gsub("'re", " are", x)
+  x = gsub("'ve", " have", x)
+  x = gsub("'m", " am", x)
+  x = gsub("'d", " would", x)
+  x = gsub("'s", "", x)
+  x = gsub('feelin', 'feeling', x)
+  x = gsub('tryin', 'trying', x)
+  x = gsub('mothafucka', 'motherfucker', x)
+  x = gsub('wanna', 'want to', x)
+  x = gsub('dat', 'that', x)
+  return(x)
+}
+removeSpecialChars <- function(x) gsub("[^a-zA-Z0-9 ]", " ", x)
+# df_cleaned$lyrics = df_per10y$lyrics %>%
+#   gsub(pattern = '\\[[^][]*]', replacement = ' ') %>%
+#   tolower() %>%
+#   clean() %>% 
+#   removeSpecialChars() %>%
+#   gsub(pattern = '[[:punct:]|[:digit:]]', replacement = ' ')
+myStopwords = c('ooh', 'oooh', 'oh', 'uh', 'baby', 'babi', 'bebe', 
+                'yeah', 'yeh', 'ye', 'yes', 'ya', 'eh', 'da', 'cardi', 'se',
+                'ayy', 'ah', 'yo', 'o', 'bum', 'na', 'la', 'ai', 'ba', 'hey','chorus',
+                'da','yo','dr','aah','mckenzie','2006','yuhh','yurr','aaaaaaaaaaaaahhhhhhh',
+                'aaahhs','aaaaahh', 'aaaaaaaaaaaaaah', 'uhuh',
+                'gon','gonna','woo','badoomboom','badoom','boom','bass')
+#count
+# df_tidy <- df_cleaned %>% 
+#     ungroup() %>% 
+#     unnest_tokens(word, lyrics) %>%
+#     filter(!word %in% myStopwords ) %>%
+#     anti_join(stop_words) %>%
+#     filter(nchar(word) > 2) %>%
+#     group_by(year,word) %>%
+#     count() %>%
+#     arrange(desc(n))
+
+
+#count1981
+df_tidy %>%
+    filter(year == 1981) -> df_count_1981
+plt_count_1981 <- df_count_1981 %>%
+    filter(n>=9) %>%
+    ggplot(aes(reorder(word, -n),n)) +
+    geom_col()
+#count1991
+df_tidy %>%
+    filter(year == 1991) -> df_count_1991
+plt_count_1991 <- df_count_1991 %>%
+    filter(n>=9) %>%
+    ggplot(aes(reorder(word, -n),n)) +
+    geom_col()
+#count2001
+df_tidy %>%
+    filter(year == 2001) -> df_count_2001
+plt_count_2001 <- df_count_2001 %>%
+    filter(n>=9) %>%
+    ggplot(aes(reorder(word, -n),n)) +
+    geom_col()
+#count2011
+df_tidy %>%
+    filter(year == 2011) -> df_count_2011
+plt_count_2011 <- df_count_2011 %>%
+    filter(n>=9) %>%
+    ggplot(aes(reorder(word, -n),n)) +
+    geom_col()
+#count2021
+df_tidy %>%
+    filter(year == 2021) -> df_count_2021
+plt_count_2021 <- df_count_2021 %>%
+    filter(n>=9) %>%
+    ggplot(aes(reorder(word, -n),n)) +
+    geom_col()
+    
+
+
+#sentiment
+ratio_song <- df_tidy %>% 
+    inner_join(get_sentiments("bing")) %>%
+    group_by(year, sentiment) %>%
+    summarize(score = n()) %>%
+    spread(sentiment, score)%>%
+    mutate(ratio = positive / (positive + negative))
+
+plt_positive_ratio <- ratio_song %>%
+    ggplot(aes(year, ratio) ) +
+    geom_line()
+
+
+
+
+
+
+# 轉換成 tidytext 格式
+tidy_text_format <- df_per10y %>%
+  unnest_tokens(output = "word", input = "lyrics")  # 以全形空白 (\u3000) 字元作為 toknenize 依據
+
+# 詞頻表 (按 topic 分類)
+word_freq <- tidy_text_format %>% 
+  group_by(year, word) %>%
+  summarise(n = n()) %>%
+  arrange(desc(word), topic)
+
+
+word_n_1981 <- word_freq %>%
+    filter(year == 1981) %>%
+    arrange(desc(n))
+word_n_1981 %>%
+    filter(n>=30) %>%
+    ggplot(aes(word, n)) +
+    geom_col()
+
+word_n_1991 <- word_freq %>%
+    filter(year == 1991) %>%
+    arrange(desc(n))
+word_n_1991 %>%
+    filter(n>=30) %>%
+    ggplot(aes(word, n)) +
+    geom_col()
+
+
+
+
+
+
+
+
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

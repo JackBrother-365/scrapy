@@ -1,0 +1,77 @@
+---
+title: "補資料"
+author: "ya.c"
+date: "6/7/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(httr)
+library(rvest)
+library(stringr)
+
+# i=20
+# j=3
+# 
+# resp <- GET("https://www.musixmatch.com/lyrics/Paula-Abdul/Rush-Rush-2")
+# html <- content(resp)
+#         
+# lyrics <- html %>%
+#     html_nodes("p.mxm-lyrics__content") %>%
+#     html_text()
+#         
+# df_lyrics[j, i] <- paste(lyrics, collapse = "")
+
+
+# tibble::tibble(
+#     year = ,
+#     rank = ,
+#     songs = ,
+#     artists = ,
+#     lyrics =
+#     
+# )
+
+#用gather轉換
+df_artists %>%
+    mutate(Rank = 1:100) %>%
+    gather("Year", "Artist", 1:50) -> df_Artist
+
+df_titles %>%
+    mutate(Rank = 1:100) %>%
+    gather("Year", "Title", 1:50) -> df_Title
+
+df_lyrics %>%
+    mutate(Rank = 1:100) %>%
+    gather("Year", "Lyrics", 1:50) -> df_Lyrics
+
+
+
+#最終的Dataframe
+df_All <- df_Title %>%
+    mutate(Artist = df_Artist$Artist,
+           Lyrics = df_Lyrics$Lyrics)
+
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

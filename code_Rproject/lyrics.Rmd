@@ -1,0 +1,62 @@
+---
+title: "lyrics"
+author: "ya.c"
+date: "6/6/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(httr)
+library(rvest)
+library(stringr)
+
+
+df_lyrics <- data.frame(matrix(NA, ncol=50, nrow = 100))
+for(i in 5 ){
+    for(j in 1:10 ){
+        print(paste0(i,"-",j))
+        resp <- GET(paste0("https://www.musixmatch.com/lyrics/", df_artists_dash[j, i],"/", df_titles_dash[j, i]) )
+        # while(resp$status_code != 200){
+        #     resp <- GET(paste0("https://www.musixmatch.com/lyrics/", df_artists_dash[i, j],"/", df_titles_dash[i, j]) )
+        # }
+        html <- content(resp)
+        
+        lyrics <- html %>%
+            html_nodes("p.mxm-lyrics__content") %>%
+            html_text()
+        
+        df_lyrics[j, i] <- paste(lyrics, collapse = "")
+        
+    }
+    y <- i + 1971
+    print(y)
+    colnames(df_lyrics)[i] <- y
+    Sys.sleep(2) 
+}
+
+
+
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
